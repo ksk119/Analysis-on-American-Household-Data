@@ -1,0 +1,407 @@
+---
+title: "HOUSE"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+# install.packages("data.table")
+# install.packages('bit64')
+# library(data.table)
+# dataset1 <- fread("D:/Trent Notes/R/Final Project/psam_husa.csv",header = TRUE);
+# psam_husb <- fread("D:/Trent Notes/R/Final Project/psam_husb.csv",header = TRUE);
+# psam_husc <- fread("D:/Trent Notes/R/Final Project/psam_husc.csv",header = TRUE);
+# psam_husd <- fread("D:/Trent Notes/R/Final Project/psam_husd.csv",header = TRUE);
+# 
+# dataset1 <- fread("D:/Trent Notes/R/Final Project/Final PRoject/dataset1.csv",header = TRUE);
+
+
+
+# House = rbind(dataset1,psam_husb,psam_husc,psam_husd);
+# rm(list = c("dataset1", "psam_husb", "psam_husc","psam_husd"));
+# 
+# install.packages(dplyr)
+# library(dplyr)
+# library(tidyverse)
+# install.packages("ggplot2")
+
+#dataset1$WATP = dataset1$WATP*as.numeric(dataset1$ADJHSG)/1000000
+#dataset1$GRNTP = dataset1$GRNTP*as.numeric(dataset1$ADJHSG)/1000000
+#dataset1$ELEP = dataset1$ELEP*as.numeric(dataset1$ADJHSG)/1000000
+#dataset1$RNTP = dataset1$RNTP*as.numeric(dataset1$ADJHSG)/1000000
+#dataset1$GASP = dataset1$GASP*as.numeric(dataset1$ADJHSG)/1000000
+
+# dataset2 <- dataset1 %>%
+#             select (ST, ELEP, TEN, TYPE,YBL, DIVISION, VACS, REGION, RNTP, GASP,WATP, GRNTP, VALP, INSP,ADJHSG)
+# 
+# dataset3 <- dataset1
+# 
+# dataset1 <- dataset2
+# 
+# head(dataset1)
+#write.csv(dataset1, "dataset1.csv")
+#rm(dataset1)
+
+
+
+```
+
+## Including Plots
+The ACS Public Use Microdata Sample files (PUMS) are a sample of the actual responses to the American Community Survey and include most population and housing characteristics. These files provide users with the flexibility to prepare customized tabulations and can be used for detailed research and analysis. The smallest geographic unit that is identified within the PUMS is the Public Use Microdata Area (PUMA).
+
+All files used over here  are provided in comma separated value (CSV) format.
+
+I have used the function fread to import data as this function is very fast in terms of importing the huge datasets .And to use this function we need to import the package data.table 
+
+This has all the data related to housing information such as area where the survey has beeen conducted and all the related housing details , utilities bill , any emi on teh House and al the relatd information has been provided in this data set including the adjustment factors and weights as well i found this data for analysing the stuff.This data has set has been downloaded from the american fact finder website and this survey has been conducted by the american federal agency .
+
+
+```{r}
+#dataset1$ST <- as.factor(dataset1$ST)
+
+
+# dataset1$ST= fct_recode(factor(dataset1$ST),"Alabama/AL"=	"1",
+# "Alaska/AK"=	"2",
+# "Arizona/AZ"=	"4",
+# "Arkansas/AR"=	"5",
+# "California/CA"=	"6",
+# "Colorado/CO"=	"8",
+# "Connecticut/CT"=	"9",
+# "Delaware/DE"=	"10",
+# "District of Columbia/DC"=	"11",
+# "Florida/FL"=	"12",
+# "Georgia/GA"=	"13",
+# "Hawaii/HI"=	"15",
+# "Idaho/ID"=	"16",
+# "Illinois/IL"=	"17",
+# "Indiana/IN"=	"18",
+# "Iowa/IA"=	"19",
+# "Kansas/KS"=	"20",
+# "Kentucky/KY"=	"21",
+# "Louisiana/LA"=	"22",
+# "Maine/ME"=	"23",
+# "Maryland/MD"=	"24",
+# "Massachusetts/MA"=	"25",
+# "Michigan/MI"=	"26",
+# "Minnesota/MN"=	"27",
+# "Mississippi/MS"=	"28",
+# "Missouri/MO"=	"29",
+# "Montana/MT"=	"30",
+# "Nebraska/NE"=	"31",
+# "Nevada/NV"=	"32",
+# "New Hampshire/NH"=	"33",
+# "New Jersey/NJ"=	"34",
+# "New Mexico/NM"=	"35",
+# "New York/NY"=	"36",
+# "North Carolina/NC"=	"37",
+# "North Dakota/ND"=	"38",
+# "Ohio/OH"=	"39",
+# "Oklahoma/OK"=	"40",
+# "Oregon/OR"=	"41",
+# "Pennsylvania/PA"=	"42",
+# "Rhode Island/RI"=	"44",
+# "South Carolina/SC"=	"45",
+# "South Dakota/SD"=	"46",
+# "Tennessee/TN"=	"47",
+# "Texas/TX"=	"48",
+# "Utah/UT"=	"49",
+# "Vermont/VT"=	"50",
+# "Virginia/VA"=	"51",
+# "Washington/WA"=	"53",
+# "West Virginia/WV"=	"54",
+# "Wisconsin/WI"=	"55",
+# "Wyoming/WY"=	"56",
+# "Puerto Rico/PR"=	"72",
+# )
+
+library(dplyr)
+
+
+ELCTY_Consumption <- (dataset1 %>%
+                        select(State = ST,ELEP) %>% group_by(State)%>%
+                        summarise(avg_elct_cost = mean(ELEP,na.rm=TRUE)) %>%
+                        arrange(desc(avg_elct_cost))) %>%
+                        head(5)
+
+
+
+ggplot(data = ELCTY_Consumption, mapping = aes(x=State , y=avg_elct_cost, fill=State )) +
+  geom_bar(stat = "identity")+labs(title = "Average Electricity Consumption by State")
+
+
+ELCTY_Consumption_1 <- ((dataset1 %>%
+                        select(State = ST,ELEP) %>% group_by(State)%>%
+                        summarise(avg_elct_cost = mean(ELEP,na.rm=TRUE)) %>%
+                        arrange(desc(avg_elct_cost))))
+ELCTY_Consumption_1
+                      
+```
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Analysis On Average Electricity Consumption by State:
+
+The Above Graph gives the analysis of the Average Electricity Consumption by State and the data has been arranged in descending order of Avg_electricity consumption so that its quite easy to figure out the Top n states in electricity consumptions . From the above graph we can infer that Alabama stands first followed by Delaware ,Goeorge and Florida.This might be helpful for some one who is willing to locate to a specfic place where the average_electricity_consumptin is less.Also we can infer from the analysis that the highest of avg electricity is 181.19 in USA .
+
+To perform this analysis i have converted the ST column to factor and specfied the levels to convert the values to a meaningfull state names .I have used the DPLYR package to perform this analysis .Here i have used to average of Electricity value to perform the analysis as it is more relevant in this Analysis 
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+# Tenant$TEN <-  as.factor(Tenant$TEN)
+
+Tenant <- dataset1 %>%
+          select(Tenure_Type =TEN) %>%
+          group_by(Tenure_Type) %>%
+          drop_na() %>%
+          summarise(Total_pop = n())
+
+Tenant$Tenure_Type= fct_recode(factor(Tenant$Tenure_Type),"Owned with mortgage or loan"= "1", "Owned with mortgage or loan"= "2", "Rented"= "3" , "Occupied without payment of rent" = "4")
+
+Tenant
+
+ggplot(Tenant, aes(x = "", y = Total_pop)) +
+  geom_bar(aes( fill = Tenure_Type),width = 1, stat = "identity", color = "white") +
+  coord_polar("y", start = 0)+labs(title = "Total Population by Tenure Type")
+
+```
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Total Population bYTenure Type:
+
+The above analysis describes the proportion of people living in USA by Tenure Type and we can easily infer from the pie chart that the majority of the people staying in usa own their houses by Mortigage or loan , second largest proportion of people leave in Rented houses . We ca see there are few people who leaved without payment of rent which ae occupied ones. A strong action has to be taken among the people who leave without paying rent . This can be further split by Region, DIVISIOn, STATE since the data i am having is very limited i could not go with the facet wrap analysis .
+
+
+To perform this analysis i have converted the TEN(Tenure Type) column to factor and specfied the levels to convert the values to a meaningfull names as provided in the data dictionary  .I have used the DPLYR package to perform this analysis .Here i have the count of population  to perform the analysis as it is more relevant over here. 
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+```{r}
+#  Property_Type$TYPE <- as.factor(Property_Type$TYPE)
+# dataset1$YBL <- as.factor(dataset1$YBL)
+
+# dataset1$TYPE= fct_recode(factor(dataset1$TYPE), Housing_unit= "1", Institutional_group_quarters= "2", Noninstitutional_group_quarters= "3")
+
+# dataset1$YBL = fct_recode(factor(dataset1$YBL), "1939 or Earlier" = "1", "1940 to 1949" = "2",
+#                               "1950 to 1959" = "3", "1960 to 1969" = "4", "1970 to 1979" = "5",
+#                               "1980 to 1989" = "6", "1990 to 1999" = "7", "2000 to 2004" = "8",
+#                               "2005" = "9","2006" = "10","2007" = "11","2008" = "12","2009" = "13",
+#                               "2010" = "14","2011" = "15","2012" = "16","2013" = "17","2014" = "18",
+#                               "2015" = "19","2016" = "20", "2017" = "21")
+
+ # dataset1$DIVISION= fct_recode(factor(dataset1$DIVISION),"Puerto Rico" = "0","New England"= "1", "Middle Atlantic"= "2", "East North Central"= "3" , "West North Central" = "4" , "South Atlantic" = "5" , "East South Central" = "6" , "West South Central" = "7" , "Mountain" = "8" , "Pacific" = "9")
+
+Property_Type <- dataset1 %>%
+            select(TYPE,DIVISION) %>%
+          group_by(TYPE, DIVISION) %>%
+          drop_na() %>%
+          summarise(Total_Pop= n())
+
+options(scipen = 999)
+
+Property_Type
+
+
+ggplot(data = Property_Type, mapping = aes(x=TYPE , y=Total_Pop, fill = TYPE )) +
+  geom_bar(stat = "identity")+theme(axis.text.x = element_text(angle = 90))+facet_wrap(~ DIVISION)+labs(title = "Type of Houses by DIVISION")
+
+```
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Type of Houses by DIVISION:
+
+This analysis is used for finding the proportion of House Type by Division and the house types are basically categorised into various types such as Housing_unit, Instutional_Group_Quarters, non-Instutional_Group_Quarters. We can clearly infer from the above graph that there are more Housing units in allmost all of the Divisions and there are few Instutional_Group_Quarters, non-Instutional_Group_Quarters.
+
+
+To perform this analysis i have converted the TYPE(Houseing Type) column to factor and specfied the levels to convert the values to a meaningfull names as provided in the data dictionary  .I have used the DPLYR package to perform this analysis .Here i have used the the count of total population to perform the analysis as it is more relevant over here.
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+```{r}
+#dataset1$VACS <- as.character(dataset1$VACS)
+# Tenant$TEN <- as.factor(Tenant$TEN)
+
+ # dataset1$VACS= fct_recode(factor(dataset1$VACS),"For rent"= "1", "Rented, not occupied"= "2", "For sale only"= "3" , "Sold, not occupied" = "4" , "For seasonal/recreational/occasional use" = "5" , "For migrant workers" = "6" , "Other vacant" = "7")
+
+Vacancy_status <- dataset1 %>%
+          select(VACS) %>%
+          group_by(VACS) %>%
+          drop_na() %>%
+          summarise(Total_No_Houses = n())
+
+
+Vacancy_status
+
+# mycols <- c("#0073C2FF", "#EFC000FF", "#868686FF", "#CD534CFF")
+
+ggplot(Vacancy_status, aes(x = "", y = Total_No_Houses)) +
+  geom_bar(aes( fill = VACS),width = 1, stat = "identity", color = "white") +
+  coord_polar("y", start = 0)+labs(title = "Vacency Status IN USA")
+
+ 
+
+```
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Vacency Status IN USA: 
+
+
+The Above analysis describe the proportion of houses for rent, sale .vacant etc.From the above graph we can easily infer that the majority of the houses are for seasonal/recreation/occasional use only followed by most of the houses are vacant.This can be furthur split by Dividion/Region/State for more granular level analysis . This analysis is most usefull for the realestate ppl and to the persons who are looking to reallocate to new cities so that they can infer the demand.
+
+To perform this analysis i have converted the VACS(Vacenvy Type ) column to factor and specfied the levels to convert the values to a meaningfull names as provided in the data dictionary  .I have used the DPLYR package to perform this analysis .Here i have used the the count of total population living in teh respective category to perform the analysis as it is more relevant over here.
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+```{r}
+# This analysis is used for finding the average mothly rent  charges per Region.
+#unique(dataset1$REGION)
+#dataset1$REGION <- as.factor(dataset1$REGION)
+
+# dataset1$REGION= fct_recode(factor(dataset1$REGION),"Northeast"= "1", "Midwest"= "2", "South"= "3" , "West" = "4" , "Puerto Rico" = "5")
+
+AVG_Monthly_RENT <- dataset1 %>%
+                    select (REGION, RNTP) %>%
+                    group_by(REGION) %>%
+                    summarise(Avg_MONTHLY_RENT = mean(RNTP, na.rm=TRUE))
+
+AVG_Monthly_RENT_State <- dataset1 %>%
+                    select (State= ST,REGION, RNTP) %>%
+                    group_by(REGION,State) %>%
+                    summarise(Avg_MONTHLY_RENT = mean(RNTP, na.rm=TRUE))
+
+AVG_Monthly_RENT_State
+
+ggplot(data = AVG_Monthly_RENT, mapping = aes(x=REGION , y=Avg_MONTHLY_RENT, fill=REGION)) +
+  geom_bar(stat = "identity")+labs(title = "Average Monthly Rent by Region In U.S,A")
+
+```
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Average Monthly Rent by U.S.A:
+
+The above graph describes the Average Monthly Rent by region in USA . From the graph we can infer that the  Monthly rent in the region West is very high comparitively to others followed by Northeast and South . This analysis is useful for the people who is looking to relocate or move to a new region.This can be furthuer split by state as well to know in specfic to the state level data and the dataframe for the same is provided.
+
+I have summarised the data by using teh Group_by function and ignored nulls while calculating the average rent as it does not make any sence since calculating the mean with the nulls is not possible .
+
+To perform this analysis i have converted the Region  column to factor and specfied the levels to convert the values to a meaningfull names as provided in the data dictionary  .I have used the DPLYR package to perform this analysis .Here i have used the average of monthly rent in teh respective category to perform the analysis as it is more relevant over here.
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+```{r}
+# install.packages("usmap")
+# library(usmap)
+
+us_Utility <- dataset1 %>%
+              select(ST,ELEP,GASP,WATP) %>%
+              mutate(state = str_sub(ST, , -4)) %>%
+              group_by(ST,state)%>%
+              summarise(avg_ELEP_COST = mean(ELEP, na.rm=TRUE) ,avg_GASP_COST = mean(GASP, na.rm=TRUE) , avg_WATP_COST = mean(WATP, na.rm=TRUE))
+
+plot_usmap(data = us_Utility, values = "avg_WATP_COST", color = "black") + 
+  scale_fill_continuous(
+    low = "white", high = "red", name = "AVG_WATER_COST", label = scales::comma
+  ) + theme(legend.position = "right")+labs(title = "Average water cost in USA" )
+
+```
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Average water cost in USA : 
+
+The above graph showcases the average water cost in the states of the USA . The states coloured with white indicates the less and the ones with the Dark red indicates the cost is high.
+
+And we can infer from the map that The average water cost is high in few states and its less over the east cost ststes .
+
+This is accheived by importing the  usmap library , states data is populated based on the states names from the state attribute and populated based on the lattitudes and longitudes given by the map library.
+
+This kind of graph is highly usefull for the instant analysis for the high level authority.
+
+To perform this analysis i have converted the State  column to factor and specfied the levels to convert the values to a meaningfull names as provided in the data dictionary  .I have used the DPLYR package to perform this analysis .Here i have used the average of water cost in teh respective state to perform the analysis as it is more relevant over here.
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+```{r}
+
+
+
+Rent_Prediction <- dataset1 %>%
+                select(ELEP,WATP,GASP,GRNTP,VALP,INSP ) %>%
+                mutate(Water_Monthly = (WATP/12), Total_utility_bill = Water_Monthly+GASP+ELEP) 
+  
+Rent_prediction_model <- lm(INSP~VALP+Total_utility_bill ,Rent_Prediction )
+
+summary(Rent_prediction_model)
+
+
+
+
+
+
+```
+#---------
+
+i am not considering this model since the R sqlqre value is very less around 17 percent .
+
+I have given a detailed analysis below for another model .
+
+
+```{r}
+
+# 
+Rentals_Prediction.df <- dataset1%>%
+  select(RNTP, GRNTP) %>%
+  filter(!is.na(RNTP), !is.na(GRNTP))
+
+Rentals_Prediction.df.lm <- lm (GRNTP ~ RNTP, Rentals.df)
+
+summary(Rentals_Prediction.df.lm)
+
+
+ggplot(Rentals_Prediction.df, aes(x=RNTP , y=GRNTP))+
+    geom_point() +    
+    geom_smooth(method=lm)+  # Add linear regression line 
+    labs(title="Relation between Family Income and their Savings")
+
+```
+Summary:
+In this analysis I have made a regression model between the Gross Rent and the rent for the house .Gross rent is nothing but the rent including the utilities and Taxes, insurance amount. For a linear regression model we should always consider the following hypothesis statement.
+H0: Rent is independent of Gross rent.
+HA: Rent is dependent on Gross Rent.
+In case If the P-value is less than 0.05 we can reject the null hypothesis and say that there is a relation between the Gross rent and rent.
+Processing of the data:
+Almost every variable is adjusted with the Adjustment variable (ADJHSG) as we have the periodical records for five years and in order to make the calculations accurate I have multiplied it with the multiplication factor.
+I believe that the gross rent is related to rent as gross rent is slightly higher since it includes all the utilities in it.
+Relation:
+Here i used the lm() function in R to find the relation between the savings and income.This function helps us in creating the linear regression model which can also be used to the predict the value of RNTP based on the GRTP using the predict function.
+Summary:
+The summary of the model describes the necessary details of the model such as the R squared value P, T value which are useful to say well does your model perform and Justify 
+Interpretation of output and coefficients:
+Residuals:
+Residuals are essentially the difference between the actual observed response values and the response values that the model predicted based on the best fit line.
+
+Coefficent Estimate:
+Intercept : The intercept of the rent is 0. 141.34 And the mean of the rent is 141.34 .
+slope: Defines the effect of Gros rent  on rent . In this perticular model it is clear that for every one dollar rise in the gross rent the rent will rise up by 1.03 .
+coefficient standard error: Helps in measuring the average amount that the coefficient estimates vary from the actual average value of our response variable.Here in this example we can say that the increase in the Gross rent  amount can wary by 0.0.33(Std.Error).
+T-value : It is a measure of how many standard deviations our coefficient estimate is away from 0 .The T value over here is  428.3
+Residual Standard Error:It is measure of the quality of a linear regression fit and is the average amount that the amount will deviate from the true regression line.Here the actual amount of Rent  can deviate from the true regression line by approximately 128.2  dollars on average.
+R-squared:This provides a measure of how well the model is fitting the actual data.It always lies between 0 and 1.In this model we got the r squared value 0.964 which means this model fits with 96%  accurate .
+F-Statistic: This also helps in determining the relationship between our predictor and the response variables. If the number larger than 1 then the f stat indicates the fitness of the model. In this example the f stat value is almost 1.57 which is much greater than 1.
+p-value:To reject the null hypothesis we should have the p value less than 0.05.Three stars represent a highly significant p-value.
+In this model we have p value 0.0000000000000002hence we can reject the null hypothesis and accept that in this particular data there is relation between Gross rent  and rent .
+
